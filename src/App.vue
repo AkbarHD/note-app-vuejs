@@ -1,31 +1,60 @@
+<script setup>
+import { ref } from 'vue';
+const showForm = ref(false);
+const newMemo = ref("");
+const memos = ref([]);
+const errorMessage = ref("");
+
+function addMemo() {
+  if (!newMemo.value) {
+    errorMessage.value = "Note tidak boleh kosong";
+    return;
+  }
+  memos.value.push({
+    id: Date.now(),
+    memo: newMemo.value,
+    date: new Date().toLocaleDateString("en-US"),
+    backgroundColor: getRandomColor() 
+  });
+
+  // console.log(memos.value);
+  newMemo.value = "";
+  showForm.value = false;
+}
+
+function getRandomColor() {
+    return '#' + Math.floor(Math.random() * 16777215).toString(16);
+}
+
+function deleteMemo(id) {
+  memos.value = memos.value.filter(memo => memo.id !== id);
+}
+
+</script>
 <template>
   <main>
     <div class="container">
       <header>
         <h1 class="header-title">Memo</h1>
-        <button class="header-button">+</button>
+        <button @click="showForm = !showForm" class="header-button">+</button>
       </header>
       <div class="card-container">
-        <div class="card">
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Commodi minus, eum quis asperiores aperiam veritatis!</p>
-            <p class="card-date">12/12/2024</p>
-        </div>
-        <div class="card">
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Commodi minus, eum quis asperiores aperiam veritatis!</p>
-            <p class="card-date">12/12/2024</p>
-        </div>
-        <div class="card">
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Commodi minus, eum quis asperiores aperiam veritatis!</p>
-            <p class="card-date">12/12/2024</p>
+        
+        <div v-for="(memo, index) in memos" :key="index" class="card" :style="{ backgroundColor: memo.backgroundColor }">
+            <p>{{ memo.memo }}</p>
+            <p class="card-date">{{ memo.date }}</p>
+            <button @click="deleteMemo(memo.id)">x</button>
         </div>
         
       </div>
     </div>
-    <div class="form-overlay">
+    <div v-if="showForm" class="form-overlay">
       <div class="form-modal">
-        <button class="form-close-btn">&times;</button>
-        <textarea name="memo" id="memo" cols="30" rows="10"></textarea>
-        <button class="form-save-btn">Save</button>
+        <!-- {{ newMemo }} -->
+          <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
+        <button @click="showForm = false" class="form-close-btn">&times;</button>
+        <textarea v-model="newMemo" id="memo" cols="30" rows="10"></textarea>
+        <button @click="addMemo" class="form-save-btn">Save</button>
       </div>
     </div>
   </main>
